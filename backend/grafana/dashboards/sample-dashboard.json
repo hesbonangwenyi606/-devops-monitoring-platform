@@ -1,10 +1,11 @@
 {
   "dashboard": {
     "id": null,
-    "uid": "sample-1",
-    "title": "DevOps Monitoring Dashboard",
+    "uid": "node-metrics",
+    "title": "Node Exporter Server Metrics",
+    "tags": ["prometheus", "system"],
     "timezone": "browser",
-    "schemaVersion": 38,
+    "schemaVersion": 16,
     "version": 1,
     "refresh": "10s",
     "panels": [
@@ -13,9 +14,8 @@
         "title": "CPU Usage (%)",
         "targets": [
           {
-            "expr": "100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
-            "legendFormat": "{{instance}}",
-            "datasource": "Prometheus"
+            "expr": "100 - (avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "legendFormat": "{{instance}}"
           }
         ],
         "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
@@ -25,9 +25,8 @@
         "title": "Memory Usage (%)",
         "targets": [
           {
-            "expr": "100 - ((node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100)",
-            "legendFormat": "{{instance}}",
-            "datasource": "Prometheus"
+            "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+            "legendFormat": "{{instance}}"
           }
         ],
         "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 }
@@ -37,43 +36,25 @@
         "title": "Disk Usage (%)",
         "targets": [
           {
-            "expr": "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes{fstype!=\"tmpfs\"})) * 100",
-            "legendFormat": "{{instance}}",
-            "datasource": "Prometheus"
+            "expr": "(1 - (node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"})) * 100",
+            "legendFormat": "{{instance}}"
           }
         ],
         "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 }
       },
       {
         "type": "graph",
-        "title": "Network Traffic (Bytes/s)",
+        "title": "System Uptime (seconds)",
         "targets": [
           {
-            "expr": "irate(node_network_receive_bytes_total[5m])",
-            "legendFormat": "Receive - {{instance}}",
-            "datasource": "Prometheus"
-          },
-          {
-            "expr": "irate(node_network_transmit_bytes_total[5m])",
-            "legendFormat": "Transmit - {{instance}}",
-            "datasource": "Prometheus"
+            "expr": "node_time_seconds - node_boot_time_seconds",
+            "legendFormat": "{{instance}}"
           }
         ],
         "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 }
-      },
-      {
-        "type": "stat",
-        "title": "Backend Uptime (seconds)",
-        "targets": [
-          {
-            "expr": "up{job=\"backend\"}",
-            "legendFormat": "Backend Status",
-            "datasource": "Prometheus"
-          }
-        ],
-        "gridPos": { "x": 0, "y": 16, "w": 24, "h": 4 }
       }
     ]
   },
   "overwrite": true
 }
+
