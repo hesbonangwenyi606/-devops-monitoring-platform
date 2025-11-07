@@ -1,5 +1,4 @@
-# DevOps Monitoring Platform - devops-monitoring-platform
-
+# DevOps Monitoring System
 This repository is a ready-to-run scaffold for a DevOps Monitoring Platform using Postgres, Prometheus, Grafana, a Node.js backend (Prisma ORM), and a React frontend.
 
 Quick start:
