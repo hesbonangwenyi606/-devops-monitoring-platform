@@ -1,38 +1,52 @@
 ### Grafana Dashboards
-
-This directory contains Grafana dashboard JSON files used for automatic provisioning when the Grafana container starts.
+This directory contains **Grafana dashboard JSON files** used for **automatic provisioning** when the Grafana container starts.
 
 ## Purpose
 
-Grafana automatically loads any dashboard JSON files placed in this folder when the container is launched.
-This allows you to version-control and automatically deploy dashboards as part of your monitoring stack.
+Grafana automatically loads any dashboard JSON files placed in this folder during container startup.  
+This setup allows you to **version-control**, **reuse**, and **auto-deploy dashboards** as part of your DevOps monitoring platform.
 
 ## Folder Structure
+
 grafana/
-└── dashboards/
-    ├── sample-dashboard.json
-    └── (add more dashboards here)
+├── dashboards/
+│ ├── sample-dashboard.json
+│ └── (add more dashboards here)
+└── provisioning/
+├── dashboards/
+└── datasources/
+
+yaml
 
 ## How It Works
 
-On container startup, Grafana scans this directory.
+On container startup:
 
-Any JSON file containing a valid dashboard definition (with a "title") will be automatically imported.
+1. Grafana scans `/var/lib/grafana/dashboards` for JSON files (mapped from this folder).
+2. It also loads configuration from `/etc/grafana/provisioning` (linked via Docker volume).
+3. Any valid dashboard JSON file containing a `"title"` is automatically imported.
 
-Dashboards are linked to Prometheus as a data source (configured in datasources.yml).
+Dashboards use **Prometheus** as the default data source, configured in:
+
+grafana/provisioning/datasources/datasource.yaml
+
+yaml
 
 ## Default Login Credentials
 
-Grafana web interface runs at http://localhost:3000
+Grafana web interface:  
+**http://localhost:3000**
 
-**Field	Default Value**
-Username	admin
-Password	admin
+| Field | Default Value |
+|--------|----------------|
+| Username | `admin` |
+| Password | `admin` |
 
-After your first login, Grafana will ask you to set a new password for security.
+>  After your first login, Grafana will prompt you to set a new password for security.
 
-If you want to override these defaults automatically (for local setups or CI/CD), you can set environment variables in your docker-compose.yml:
+You can override these defaults by editing your `docker-compose.yml`:
 
+```yaml
 grafana:
   image: grafana/grafana:latest
   environment:
@@ -43,43 +57,41 @@ grafana:
   volumes:
     - ./grafana/dashboards:/var/lib/grafana/dashboards
     - ./grafana/provisioning:/etc/grafana/provisioning
-
 ## Adding a New Dashboard
+In the Grafana UI:
+Go to Dashboard Settings → JSON Model → Copy JSON.
 
-Export a dashboard from Grafana UI:
-Dashboard settings → JSON model → Copy JSON
-
-Save it inside this folder (e.g., cpu-metrics.json)
+## Save the JSON file inside:
+grafana/dashboards/
+For example:
+grafana/dashboards/cpu-metrics.json
 
 ## Restart Grafana:
-
 docker restart devops-monitoring-platform-grafana-1
+Grafana will automatically import the new dashboard at startup.
 
-
-Grafana will automatically import it at startup.
-
-## Import Example Dashboards via Grafana UI
-
-You can import ready-made Prometheus dashboards directly:
+## Import Example Dashboards (Optional)
+You can also import prebuilt dashboards directly from Grafana Labs:
 
 Open Grafana → Dashboards → Import
 
-Enter one of these IDs:
+Enter one of these dashboard IDs:
 
-1860 — Node Exporter Full (Linux server metrics)
+Dashboard Name	ID	Description
+Node Exporter Full	1860	Linux server metrics (CPU, memory, disk, etc.)
+Prometheus 2.0 Overview	3662	Overview of Prometheus metrics and performance
 
-3662 — Prometheus 2.0 Overview
-
-Click Load, select your Prometheus data source, and click Import
+Click Load, select your Prometheus data source, and click Import.
 
 ## Troubleshooting
+Error:
 
-If you see:
-
+**php**
 Dashboard title cannot be empty
+Fix:
+Ensure your JSON file includes a valid title, for example:
 
-
-→ Ensure your JSON file includes:
+**json**
 
 {
   "dashboard": {
@@ -87,3 +99,15 @@ Dashboard title cannot be empty
     ...
   }
 }
+## Related Files
+File	Description
+grafana/provisioning/datasources/datasource.yaml	Defines the Prometheus data source
+grafana/provisioning/dashboards/dashboard.yaml	Links dashboards directory for auto-import
+grafana/dashboards/sample-dashboard.json	Example system metrics dashboard
+
+## Result:
+All dashboards in this folder are auto-loaded with Prometheus as the data source whenever Grafana starts — ensuring a repeatable and consistent monitoring setup for all environments.
+
+## Maintainer:
+Hesbon Angwenyi
+Project: DevOps Monitoring Platform
